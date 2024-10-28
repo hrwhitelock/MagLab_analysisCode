@@ -1,9 +1,10 @@
 %% kappa continuous Tswp analysis
-function kappaContinuousTswpAnalysis(fname)
+function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor)
     data = load(fname); 
     dataOut = struct; 
     % first get on vs off
-    curr = data.current; 
+    data.current = data.current*1e-3; 
+    curr = data.current;   %% saved in mA for some fkn reason
     one = zeros(1,length(curr));
     two = zeros(1, length(curr));
     off = zeros(1,length(curr)); 
@@ -25,15 +26,15 @@ function kappaContinuousTswpAnalysis(fname)
     end
     data.dT = data.hotTemp-data.coldTemp;
     data.power = data.current .* data.heaterVoltage; 
-    data.sampleTemp = (data.hotTemp+data.coldTemp)/2;
+    data.sampleTemp = (data.hotTemp+data.coldTemp)*3/2;
 %     dataOut.rawdT = data.dT; 
     % let's take the average of each of these point
     for j= 1:length(offidx)-1 
         skipPtsOff = round((oneidx(j) - offidx(j))/2); 
         skipPtsOne = round((twoidx(j) - oneidx(j))/2);
         skipPtsTwo = round((offidx(j+1) - twoidx(j))/2);
-        disp(skipPts)
-        if skipPts < 0
+%         disp(skipPts)
+        if skipPtsOff < 0
             disp('oh nooooo')
         end
 %         disp(skipPts)
@@ -43,28 +44,40 @@ function kappaContinuousTswpAnalysis(fname)
         allGood(offidx(j)+skipPtsOff:oneidx(j)) = 1;
 
         % get data for off points
-        dataOut.bathTemp(i) = mean(data.bathTemp(offidx(j)+skipPtsOff:oneidx(j))); 
-        dataOut.dToff(i) = mean(data.dt(offidx(j)+skipPtsOff:oneidx(j)));
-        dataOut.powerOff(i) = mean(data.power(offidx(j)+skipPtsOff:oneidx(j)));
+        dataOut.bathTemp(j) = mean(data.bathTemp(offidx(j)+skipPtsOff:oneidx(j))); 
+        dataOut.dToff(j) = mean(data.dT(offidx(j)+skipPtsOff:oneidx(j)));
+        dataOut.powerOff(j) = mean(data.power(offidx(j)+skipPtsOff:oneidx(j)));
 
         one(oneidx(j)+skipPtsOne:twoidx(j)) = 1; 
         allGood(oneidx(j)+skipPtsOne:twoidx(j)) = 1;
 
-        dataOut.dTone(i) = mean(data.dt(oneidx(j)+skipPtsOne:twoidx(j)));
-        dataOut.powerOne(i) = mean(data.power(oneidx(j)+skipPtsOne:twoidx(j)));
+        dataOut.dTone(j) = mean(data.dT(oneidx(j)+skipPtsOne:twoidx(j)));
+        dataOut.powerOne(j) = mean(data.power(oneidx(j)+skipPtsOne:twoidx(j)));
 
         two(twoidx(j)+skipPtsTwo:offidx(j+1))=1;
         allGood(twoidx(j)+skipPtsTwo:offidx(j+1))=1;
 
-        dataOut.bathTemp(i) = mean(data.bathTemp(twoidx(j)+skipPtsTwo:offidx(j+1))); 
-        dataOut.dTtwo(i) = mean(data.dt(twoidx(j)+skipPtsTwo:offidx(j+1)));
-        dataOut.powerTwo(i) = mean(data.power(twoidx(j)+skipPtsTwo:offidx(j+1)));
+        dataOut.bathTemp(j) = mean(data.bathTemp(twoidx(j)+skipPtsTwo:offidx(j+1))); 
+        dataOut.dTtwo(j) = mean(data.dT(twoidx(j)+skipPtsTwo:offidx(j+1)));
+        dataOut.powerTwo(j) = mean(data.power(twoidx(j)+skipPtsTwo:offidx(j+1)));
 
     end
-    
+    for i = 1:length(dataOut.bathTemp)
+        pow = [dataOut.powerOff(i), dataOut.powerOne(i), dataOut.powerTwo(i)]; 
+        if pow == [0 0 0]
+            disp('abort'); 
+            break
+        end
+        dT = [dataOut.dToff(i), dataOut.dTone(i), dataOut.dTtwo(i)];
+        currFit = polyfit(pow, dT, 1); 
+        currSlope = currFit(1);
+        dataOut.dTIV(i) = currSlope; % com
+        dataOut.conductance(i) = 1/currSlope; 
+        dataOut.conductivity(i) = (1/currSlope)*geometricFactor;
+    end
 
     dataOut.good = logical(allGood); 
-    dataOut.one = logical(on); 
+    dataOut.one = logical(one); 
     dataOut.off = logical(off); 
     dataOut.two = logical(two); 
 
