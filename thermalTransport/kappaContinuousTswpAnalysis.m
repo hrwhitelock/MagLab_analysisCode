@@ -1,14 +1,20 @@
 %% kappa continuous Tswp analysis
-function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor)
+function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor, hotFit, coldFit,bathFit)
     data = load(fname); 
     dataOut = struct; 
     % first get on vs off
-    data.current = data.current*1e-3; 
+    data.current = data.current*1e-3; %% saved in mA for some fkn reason
     curr = data.current;   %% saved in mA for some fkn reason
     one = zeros(1,length(curr));
     two = zeros(1, length(curr));
     off = zeros(1,length(curr)); 
     allGood = zeros(1,length(curr));
+    % adjust the temperature conversion
+    % figure out a way to change this :(
+    data.hotTemp = hotFit(data.hotRes).'; % refitting temps if non zero fits entered
+    data.coldTemp = coldFit(data.coldRes).';
+    data.bathTemp = bathFit(data.bathRes).';
+
 
     df = gradient(curr);
     oneidx =[]; 
@@ -26,7 +32,7 @@ function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor)
     end
     data.rawdT = data.hotTemp-data.coldTemp;
     data.power = data.current .* data.heaterVoltage; 
-    data.sampleTemp = (data.hotTemp+data.coldTemp)*3/2;
+    data.sampleTemp = (data.hotTemp+data.coldTemp)*1/2;
 %     dataOut.rawdT = data.dT; 
 
     % let's bg subtract and then take the average of each of these point
@@ -43,7 +49,7 @@ function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor)
 
         off(offidx(j)+skipPtsOff:oneidx(j)) = 1; 
         allGood(offidx(j)+skipPtsOff:oneidx(j)) = 1;
-        bgdT = horzcat(data.rawdT(offidx(j)+skipPtsOff:oneidx(j)),data.rawdT(offidx(j+1)+skipPtsOff:oneidx(j+1))); 
+        % bgdT = horzcat(data.rawdT(offidx(j)+skipPtsOff:oneidx(j)),data.rawdT(offidx(j+1)+skipPtsOff:oneidx(j+1))); 
         bgHot = horzcat(data.hotTemp(offidx(j)+skipPtsOff:oneidx(j)),data.hotTemp(offidx(j+1)+skipPtsOff:oneidx(j+1)));
         bgCold = horzcat(data.coldTemp(offidx(j)+skipPtsOff:oneidx(j)),data.coldTemp(offidx(j+1)+skipPtsOff:oneidx(j+1)));
 

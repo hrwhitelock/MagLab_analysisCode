@@ -1,6 +1,7 @@
-function out = quickCalcsThermalTrans(topLevelFolder, geometricFactor)
+function out = quickCalcsThermalTrans(topLevelFolder, geometricFactor, hotFit, coldFit,bathFit)
+    % enter fits as 0 to skip and use whatever fit is already loaded
     out = struct; 
-    fnames = getFiles(topLevelFolder); % ui, spits out cell array, use char
+    fnames = getCycleFiles(topLevelFolder); % ui, spits out cell array, use char
 
     for i = 1:length(fnames)
         data = load(char(fnames(i)));
@@ -9,7 +10,13 @@ function out = quickCalcsThermalTrans(topLevelFolder, geometricFactor)
         else
             out.field(i) = 0.0; 
         end
-        % now we cook with gas bitches
+        % if hotFit ~= 0 && coldFit ~=0 && bathFit ~= 0
+            data.hotTemp = hotFit(data.hotRes); % refitting temps if non zero fits entered
+            data.coldTemp = coldFit(data.coldRes);
+            data.bathTemp = bathFit(data.bathRes);
+        % end
+
+        % now we cook with gas
         wanted = data.logicalArray;
         hotTemp = mean(data.hotTemp(wanted)); 
         coldTemp = mean(data.coldTemp(wanted)); 
