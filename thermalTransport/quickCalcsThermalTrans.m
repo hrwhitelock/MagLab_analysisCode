@@ -20,6 +20,9 @@ function out = quickCalcsThermalTrans(topLevelFolder, geometricFactor, hotFit, c
         wanted = data.logicalArray;
         hotTemp = mean(data.hotTemp(wanted)); 
         coldTemp = mean(data.coldTemp(wanted)); 
+        out.hotRes(i) = mean(data.hotRes(wanted)); 
+        out.coldRes(i) = mean(data.coldRes(wanted));
+        out.bathRes(i) = mean(data.bathRes(wanted)); 
         out.sampleTemp(i) = (hotTemp + coldTemp)/2; 
         dT = data.hotTemp(wanted) -data.coldTemp(wanted);
         out.probeTemp(i) = mean(data.ChanD(wanted)); 
@@ -45,6 +48,8 @@ function out = quickCalcsThermalTrans(topLevelFolder, geometricFactor, hotFit, c
             % now we do dt/Isq
             curr = data.current(wanted); 
             voltage = data.heaterVoltage(wanted); 
+            out.current(i) = max(curr); 
+            out.voltage(i) = max(voltage); 
             currFit = polyfit(curr.*voltage, dT, 1); 
             currSlope = currFit(1);
             out.dTIV(i) = currSlope; % com
@@ -57,7 +62,7 @@ function out = quickCalcsThermalTrans(topLevelFolder, geometricFactor, hotFit, c
             out.dTfitted(i) = dTslope; 
 
             out.time(i) = mean(data.Time); 
-            out.raw = data; 
+            out.raw(i) = data; 
         end
     end
 end

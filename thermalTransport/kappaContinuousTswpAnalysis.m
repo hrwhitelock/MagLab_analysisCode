@@ -86,6 +86,8 @@ function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor, hotFit, c
 %         dataOut.bathTemp(j) = mean(data.bathTemp(twoidx(j)+skipPtsTwo:offidx(j+1))); 
         dataOut.dTtwo(j) = mean(data.dT(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
         dataOut.powerTwo(j) = mean(data.power(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
+        dataOut.voltage(j) = mean(data.heaterVoltage(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
+        dataOut.current(j) = mean(data.current(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
 
     end
     for i = 1:length(dataOut.bathTemp)
