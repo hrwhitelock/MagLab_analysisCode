@@ -58,7 +58,10 @@ function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor, hotFit, c
         % do it based on temp bc our index spacing is not equal
         bgHotFit = polyfit(temp, bgHot, 1);
         bgColdFit = polyfit(temp, bgCold, 1);
-
+        
+        tempHot = bgHotFit(2); 
+        tempCold = bgColdFit(2); 
+        dataOut.dToffset(j) = tempHot-tempCold; 
         %bg subtract for this interval
         hotbg = polyval(bgHotFit, data.bathTemp(offidx(j):offidx(j+1)-1));
         coldbg = polyval(bgColdFit, data.bathTemp(offidx(j):offidx(j+1)-1));

@@ -52,6 +52,7 @@ function out = quickCalcsThermalTrans(topLevelFolder, geometricFactor, hotFit, c
             out.voltage(i) = max(voltage); 
             currFit = polyfit(curr.*voltage, dT, 1); 
             currSlope = currFit(1);
+            out.dToffset(i) = currFit(2); 
             out.dTIV(i) = currSlope; % com
             out.conductance(i) = 1/currSlope; 
             out.conductivity(i) = (1/currSlope)*geometricFactor; 
