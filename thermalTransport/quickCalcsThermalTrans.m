@@ -20,23 +20,32 @@ function out = quickCalcsThermalTrans(topLevelFolder, geometricFactor, hotFit, c
         wanted = data.logicalArray;
         hotTemp = mean(data.hotTemp(wanted)); 
         coldTemp = mean(data.coldTemp(wanted)); 
-        out.hotRes(i) = mean(data.hotRes(wanted)); 
-        out.coldRes(i) = mean(data.coldRes(wanted));
-        out.bathRes(i) = mean(data.bathRes(wanted)); 
+        % out.hotRes(i) = mean(data.hotRes(wanted)); 
+        % out.coldRes(i) = mean(data.coldRes(wanted));
+        % out.bathRes(i) = mean(data.bathRes(wanted)); 
         out.sampleTemp(i) = (hotTemp + coldTemp)/2; 
         dT = data.hotTemp(wanted) -data.coldTemp(wanted);
         out.probeTemp(i) = mean(data.ChanD(wanted)); 
         meanHotTemp = []; 
         meanColdTemp = []; 
         meanSampleTemp =[]; 
-        
+        meanHotRes = []; 
+        meanColdRes = [];
+        meanBathRes = []; 
+
         for j = 1:length(data.current)
             if data.current(j) == 0
+                meanHotRes(end+1) = mean(data.hotRes(j)); 
+                meanColdRes(end+1) = mean(data.coldRes(j));
+                meanBathRes(end+1) = mean(data.bathRes(j)); 
                 meanHotTemp(end+1) = data.hotTemp(j);
                 meanColdTemp(end+1) = data.coldTemp(j); 
                 meanSampleTemp(end+1) = (data.hotTemp(j)+data.coldTemp(j))/2;
             end
         end
+        out.hotRes(i) = mean(meanHotRes);
+        out.coldRes(i) = mean(meanColdRes);
+        out.bathRes(i) = mean(meanBathRes);
         out.hotTemp(i) = mean(meanHotTemp);
         out.coldTemp(i) = mean(meanColdTemp);
         out.sampleTemp(i) = mean(meanSampleTemp);
