@@ -1,5 +1,8 @@
 %% kappa continuous Tswp analysis
-function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor, hotFit, coldFit,bathFit)
+function dataOut = kappaContinuousTswpAnalysis(geometricFactor, hotFit, coldFit,bathFit)
+%     data = load(fname); 
+    [baseName, folder] = uigetfile();
+    fname = fullfile(folder, baseName); 
     data = load(fname); 
     dataOut = struct; 
     % first get on vs off
