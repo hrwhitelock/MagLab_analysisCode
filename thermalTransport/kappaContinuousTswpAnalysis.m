@@ -1,8 +1,7 @@
 %% kappa continuous Tswp analysis
-function dataOut = kappaContinuousTswpAnalysis(geometricFactor, hotFit, coldFit,bathFit)
-%     data = load(fname); 
-    [baseName, folder] = uigetfile();
-    fname = fullfile(folder, baseName); 
+function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor) %, hotFit, coldFit,bathFit)
+    % [baseName, folder] = uigetfile();
+    % fname = fullfile(folder, baseName); 
     data = load(fname); 
     dataOut = struct; 
     % first get on vs off
@@ -14,9 +13,9 @@ function dataOut = kappaContinuousTswpAnalysis(geometricFactor, hotFit, coldFit,
     allGood = zeros(1,length(curr));
     % adjust the temperature conversion
     % figure out a way to change this :(
-    data.hotTemp = hotFit(data.hotRes).'; % refitting temps if non zero fits entered
-    data.coldTemp = coldFit(data.coldRes).';
-    data.bathTemp = bathFit(data.bathRes).';
+    % data.hotTemp = hotFit(data.hotRes).'; % refitting temps if non zero fits entered
+    % data.coldTemp = coldFit(data.coldRes).';
+    % data.bathTemp = bathFit(data.bathRes).';
 
 
     df = gradient(curr);
@@ -55,7 +54,10 @@ function dataOut = kappaContinuousTswpAnalysis(geometricFactor, hotFit, coldFit,
         % bgdT = horzcat(data.rawdT(offidx(j)+skipPtsOff:oneidx(j)),data.rawdT(offidx(j+1)+skipPtsOff:oneidx(j+1))); 
         bgHot = horzcat(data.hotTemp(offidx(j)+skipPtsOff:oneidx(j)),data.hotTemp(offidx(j+1)+skipPtsOff:oneidx(j+1)));
         bgCold = horzcat(data.coldTemp(offidx(j)+skipPtsOff:oneidx(j)),data.coldTemp(offidx(j+1)+skipPtsOff:oneidx(j+1)));
+        dataOut.avgHotOff(j) = mean(data.hotTemp(offidx(j)+skipPtsOff:oneidx(j)));
+        dataOut.avgColdOff(j) = mean(data.coldTemp(offidx(j)+skipPtsOff:oneidx(j)));
 
+            
         temp = horzcat(data.bathTemp(offidx(j)+skipPtsOff:oneidx(j)),data.bathTemp(offidx(j+1)+skipPtsOff:oneidx(j+1))) ; 
         % now we want to fit that bg so we can subtract
         % do it based on temp bc our index spacing is not equal
@@ -75,7 +77,7 @@ function dataOut = kappaContinuousTswpAnalysis(geometricFactor, hotFit, coldFit,
         % get data for off points
         dataOut.bathTemp(j) = mean(data.bathTemp(offidx(j)+skipPtsOff:oneidx(j))); 
         dataOut.sampleTemp(j) = (mean(data.hotTemp(offidx(j)+skipPtsOff:oneidx(j)))+ mean(data.coldTemp(offidx(j)+skipPtsOff:oneidx(j))))/2; 
-
+        
         dataOut.dToff(j) = mean(data.dT(offidx(j)+skipPtsOff:oneidx(j)));
         dataOut.powerOff(j) = mean(data.power(offidx(j)+skipPtsOff:oneidx(j)));
 

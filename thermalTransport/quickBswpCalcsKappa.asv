@@ -1,8 +1,5 @@
 %% do kappa Bswp analysis
-function dataOut = quickBswpCalcsKappa(fname, geometricFactor) %, hotFit, coldFit,bathFit)
-    % data = load(fname); 
-    % [baseName, folder] = uigetfile();
-    % fname = fullfile(folder, baseName); 
+function dataOut = quickBswpCalcsKappa(fname, geometricFactor)
     data = load(fname); 
     dataOut = struct; 
     % first get on vs off
@@ -11,10 +8,6 @@ function dataOut = quickBswpCalcsKappa(fname, geometricFactor) %, hotFit, coldFi
     on = zeros(1,length(curr));
     off = zeros(1,length(curr)); 
     allGood = zeros(1,length(curr));
-    % % redo the cx fits --> comment this out for quick analysis
-    % data.hotTemp = hotFit(data.hotRes); % refitting temps if non zero fits entered
-    % data.coldTemp = coldFit(data.coldRes);
-    % data.bathTemp = bathFit(data.bathRes);
 
     df = gradient(curr);
     onidx =[]; 
@@ -66,18 +59,12 @@ function dataOut = quickBswpCalcsKappa(fname, geometricFactor) %, hotFit, coldFi
         dataOut.avgField(j) = mean(data.field(offidx(j):offidx(j+1)));
         dataOut.avgdToff(j) = mean(data.dT(offidx(j)+skipPts:onidx(j)));
         dataOut.avgColdOff(j) = mean(data.coldTemp(offidx(j)+skipPts:onidx(j)));
-        dataOut.avgColdOffSTDDEV(j) = std(data.coldTemp(offidx(j)+skipPts:onidx(j)));
         dataOut.avgHotOff(j) = mean(data.hotTemp(offidx(j)+skipPts:onidx(j)));
-        dataOut.avgHotOffSTDDEV(j) = std(data.hotTemp(offidx(j)+skipPts:onidx(j)));
 
         on(onidx(j)+skipPts:offidx(j+1)) = 1; 
         allGood(onidx(j)+skipPts:offidx(j+1)) = 1;
 
         dataOut.avgdTon(j) = mean(data.dT(onidx(j)+skipPts:offidx(j+1)-1));
-        dataOut.avgColdOn(j) = mean(data.coldTemp(onidx(j)+skipPts:offidx(j+1)-1));
-        dataOut.avgHotOn(j) = mean(data.hotTemp(onidx(j)+skipPts:offidx(j+1)-1));
-        dataOut.avgColdOnSTDDEV(j) = std(data.coldTemp(onidx(j)+skipPts:offidx(j+1)-1)); 
-        dataOut.avgHotOnSTDDEV(j) = std(data.hotTemp(onidx(j)+skipPts:offidx(j+1)-1));
 
         dataOut.current(j) = mean(data.current(onidx(j)+skipPts:offidx(j+1)-1)); 
         dataOut.voltage(j) = mean(data.heaterVoltage(onidx(j)+skipPts:offidx(j+1)-1)); 
@@ -90,8 +77,8 @@ function dataOut = quickBswpCalcsKappa(fname, geometricFactor) %, hotFit, coldFi
 
         dataOut.sampleTemp(j) = mean(data.sampleTemp(offidx(j):onidx(j)));
         dataOut.bathTemp(j) = mean(data.bathTemp(offidx(j):onidx(j))); 
-        % dataOut.hotTemp(j) = mean(data.hotTemp(offidx(j):onidx(j))); 
-        % dataOut.coldTemp(j) = mean(data.coldTemp(offidx(j):onidx(j)));
+        dataOut.hotTemp(j) = mean(data.hotTemp(offidx(j):onidx(j))); 
+        dataOut.coldTemp(j) = mean(data.coldTemp(offidx(j):onidx(j)));
         dataOut.avgField(j) = mean(data.field(offidx(j):offidx(j+1)-1));
 
     end
