@@ -39,15 +39,15 @@ function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor) %, hotFit
 
     % let's bg subtract and then take the average of each of these point
     for j= 1:length(offidx)-2 
-        skipPtsOff = round((oneidx(j) - offidx(j))/2); 
-        skipPtsOne = round((twoidx(j) - oneidx(j))/2);
-        skipPtsTwo = round((offidx(j+1) - twoidx(j))/2);
-%         disp(skipPts)
-        if skipPtsOff < 0
-            disp('oh nooooo')
+        try
+            skipPtsOff = round((oneidx(j) - offidx(j))/2); 
+            skipPtsOne = round((twoidx(j) - oneidx(j))/2);
+            skipPtsTwo = round((offidx(j+1) - twoidx(j))/2);
+        catch
+            skipPtsOff = round((oneidx(j) - offidx(j))/2); 
+            skipPtsOne = round((offidx(j+1) - oneidx(j))/2);
+            skipPtsTwo = 0;
         end
-%         disp(skipPts)
-%         disp([num2str(onidx(j)), 'off: ', num2str(offidx(j))])
 
         off(offidx(j)+skipPtsOff:oneidx(j)) = 1; 
         allGood(offidx(j)+skipPtsOff:oneidx(j)) = 1;
@@ -56,6 +56,7 @@ function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor) %, hotFit
         bgCold = horzcat(data.coldTemp(offidx(j)+skipPtsOff:oneidx(j)),data.coldTemp(offidx(j+1)+skipPtsOff:oneidx(j+1)));
         dataOut.avgHotOff(j) = mean(data.hotTemp(offidx(j)+skipPtsOff:oneidx(j)));
         dataOut.avgColdOff(j) = mean(data.coldTemp(offidx(j)+skipPtsOff:oneidx(j)));
+        dataOut.avgVoltageOff(j) = mean(data.heaterVoltage(offidx(j)+skipPtsOff:oneidx(j))); 
 
             
         temp = horzcat(data.bathTemp(offidx(j)+skipPtsOff:oneidx(j)),data.bathTemp(offidx(j+1)+skipPtsOff:oneidx(j+1))) ; 
@@ -77,34 +78,49 @@ function dataOut = kappaContinuousTswpAnalysis(fname, geometricFactor) %, hotFit
         % get data for off points
         dataOut.bathTemp(j) = mean(data.bathTemp(offidx(j)+skipPtsOff:oneidx(j))); 
         dataOut.sampleTemp(j) = (mean(data.hotTemp(offidx(j)+skipPtsOff:oneidx(j)))+ mean(data.coldTemp(offidx(j)+skipPtsOff:oneidx(j))))/2; 
-        
+        dataOut.probTemp(j) = mean(data.ChanD(offidx(j)+skipPtsOff:oneidx(j))); 
         dataOut.dToff(j) = mean(data.dT(offidx(j)+skipPtsOff:oneidx(j)));
         dataOut.powerOff(j) = mean(data.power(offidx(j)+skipPtsOff:oneidx(j)));
 
-        one(oneidx(j)+skipPtsOne:twoidx(j)) = 1; 
-        allGood(oneidx(j)+skipPtsOne:twoidx(j)) = 1;
-
-
-        dataOut.dTone(j) = mean(data.dT(oneidx(j)+skipPtsOne:twoidx(j)));
-        dataOut.powerOne(j) = mean(data.power(oneidx(j)+skipPtsOne:twoidx(j)));
-
-        two(twoidx(j)+skipPtsTwo:offidx(j+1))=1;
-        allGood(twoidx(j)+skipPtsTwo:offidx(j+1))=1;
-
-%         dataOut.bathTemp(j) = mean(data.bathTemp(twoidx(j)+skipPtsTwo:offidx(j+1))); 
-        dataOut.dTtwo(j) = mean(data.dT(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
-        dataOut.powerTwo(j) = mean(data.power(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
-        dataOut.voltage(j) = mean(data.heaterVoltage(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
-        dataOut.current(j) = mean(data.current(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
-
+        try
+            one(oneidx(j)+skipPtsOne:twoidx(j)) = 1; 
+            allGood(oneidx(j)+skipPtsOne:twoidx(j)) = 1;
+            dataOut.dTone(j) = mean(data.dT(oneidx(j)+skipPtsOne:twoidx(j)));
+            dataOut.powerOne(j) = mean(data.power(oneidx(j)+skipPtsOne:twoidx(j)));
+    
+            two(twoidx(j)+skipPtsTwo:offidx(j+1))=1;
+            allGood(twoidx(j)+skipPtsTwo:offidx(j+1))=1;
+    
+    %         dataOut.bathTemp(j) = mean(data.bathTemp(twoidx(j)+skipPtsTwo:offidx(j+1))); 
+            dataOut.dTtwo(j) = mean(data.dT(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
+            dataOut.powerTwo(j) = mean(data.power(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
+            dataOut.voltage(j) = mean(data.heaterVoltage(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
+            dataOut.current(j) = mean(data.current(twoidx(j)+skipPtsTwo:offidx(j+1)-1));
+        catch
+            one(oneidx(j)+skipPtsOne:offidx(j+1)) = 1; 
+            allGood(oneidx(j)+skipPtsOne:offidx(j+1)) = 1;
+            dataOut.dTone(j) = mean(data.rawdT(oneidx(j)+skipPtsOne:offidx(j+1)));
+            dataOut.powerOne(j) = mean(data.power(oneidx(j)+skipPtsOne:offidx(j+1)));
+    
+            % two(twoidx(j)+skipPtsTwo:offidx(j+1))=1;
+            allGood(oneidx(j)+skipPtsOne:offidx(j+1))=1;
+    
+    %         dataOut.bathTemp(j) = mean(data.bathTemp(twoidx(j)+skipPtsTwo:offidx(j+1))); 
+            % dataOut.dTtwo(j) = dataOut.dTone(j);
+            % dataOut.powerTwo(j) = dataOut.powerOne(j);
+            dataOut.voltage(j) = mean(data.heaterVoltage(oneidx(j)+skipPtsOne:offidx(j+1)-10));
+            dataOut.current(j) = mean(data.current(oneidx(j)+skipPtsOne:offidx(j+1)-1));
+        end
     end
     for i = 1:length(dataOut.bathTemp)
+        try
         pow = [dataOut.powerOff(i), dataOut.powerOne(i), dataOut.powerTwo(i)]; 
-        if pow == [0 0 0]
-            disp('abort'); 
-            break
-        end
         dT = [dataOut.dToff(i), dataOut.dTone(i), dataOut.dTtwo(i)];
+        catch
+            pow = [dataOut.powerOff(i), dataOut.powerOne(i)];
+            dT = [dataOut.dToff(i), dataOut.dTone(i)];
+        end
+        
         currFit = polyfit(pow, dT, 1); 
         currSlope = currFit(1);
         dataOut.dTIV(i) = currSlope; % com
