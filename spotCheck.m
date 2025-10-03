@@ -1,4 +1,5 @@
 function spotCheck()
+% this is changed
     [baseName, folder] = uigetfile();
     fname = fullfile(folder, baseName); 
     datacell = load(fname); 
